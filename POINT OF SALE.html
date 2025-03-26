@@ -542,11 +542,22 @@
         function searchItems() {
             let input = document.getElementById('searchInput').value.toLowerCase();
             let itemsContainer = document.getElementById('itemsContainer');
-            let items = JSON.parse(localStorage.getItem('items')) || [];            
-                itemsContainer.innerHTML = '';
-            let filteredItems = items.filter(item => item.name.toLowerCase().includes(input));            
-                filteredItems.forEach((item, index) => {
-                    const itemCard = document.createElement('div');
+            let items = JSON.parse(localStorage.getItem('items')) || [];
+            let category = localStorage.getItem('selectedCategory') || ''; // Get the current category
+        
+            itemsContainer.innerHTML = '';
+        
+            if (input === '') {
+                loadItems(category); // Reload only the selected category instead of all items
+                return;
+            }
+        
+            let filteredItems = items
+                .map((item, originalIndex) => ({ ...item, originalIndex })) // Keep track of original index
+                .filter(item => item.name.toLowerCase().includes(input));
+        
+            filteredItems.forEach((item) => {
+                const itemCard = document.createElement('div');
                 itemCard.className = 'item-card';
                 itemCard.innerHTML = `
                     <img src="${item.image}" alt="${item.name}">
@@ -555,15 +566,19 @@
                         <p>${item.stock || 0} in Stock</p>
                         <p>${item.type === 'product' ? 'Selling Price: Ksh.' + item.sellingPrice : 'Customer Price: Ksh.' + item.customerPrice}</p>
                         <div class="button-group">
-                            <button onclick="openPopup(${index})">Add to Cart</button>
-                            <button class="edit-btn" onclick="openEditPopup(${index})">Edit</button>
+                            <button onclick="openPopup(${item.originalIndex})">Add to Cart</button>
+                            <button class="edit-btn" onclick="openEditPopup(${item.originalIndex})">Edit</button>
                         </div>
                     </div>
                 `;
                 itemsContainer.appendChild(itemCard);
             });
+        
+            // Clear search bar after user interacts with search results
+            document.getElementById('searchInput').addEventListener('blur', function () {
+                this.value = '';
+            });
         }
-
         document.addEventListener("DOMContentLoaded", function () {
             const itemsContainer = document.getElementById("items-container"); // Ensure this element exists in HTML
             const items = JSON.parse(localStorage.getItem("items")) || [];
