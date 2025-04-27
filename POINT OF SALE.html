@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PIDEN | POINT OF SALE</title>
+    <link rel="shortcut icon" type="image/x-icon" href="Favicon.jpg">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>/* Sidebar styles */
+        .search-container {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .search-container input {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 200px;
+        }
+        .search-container button {
+            background-color: blue;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+        .search-container button:hover {
+            background-color: darkblue;
+        }
+       .sidebar {
+            width: 250px;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: blue;
+            color: white;
+            padding-top: 20px;
+            transition: 0.3s;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar ul {
+            list-style-type: circle;
+            padding: 10;
+        }
+        .sidebar ul li {
+            padding: 8px;
+            text-align: justify;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        .open-btn {
+            font-size: 30px;
+            cursor: pointer;
+        }
+        /* Rest of the styles */
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+        }        
+        header {
+            background-color: blue;
+            color: white;
+            padding: 0.1px;
+            text-align: center;
+            border-bottom-left-radius: 30%;
+        }        
+        footer {
+            text-align: center;
+            padding: 10px;
+            border-top-right-radius: 30%;
+        }        
+        button {
+            background-color: white;
+            color: blue;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: lime;
+        }        
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 5px;
+        }        
+        form label {
+            display: block;
+            margin-bottom: 5px;
+        }        
+        form input,
+        form select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        * {
+          box-sizing: border-box;
+        }
+        .category-icons {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin: 20px 0;
+        }
+        .category-icons button {
+          background-color: #fff;
+          border: 2px solid blue;
+          border-radius: 10px;
+          padding: 10px 20px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+        }
+        .category-icons button:hover {
+          background-color: blue;
+          color: white;
+        }
+        .items-container {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 10px;
+          padding: 0 20px;
+        }
+        .item-card {
+          background-color: lime;
+          padding: 10px;
+          border-radius: 15px;
+          box-shadow: 0 4px 8px rgb(0, 0, 0, 0.1);
+          text-align: center;
+        }
+        .item-card img {
+          width: 100px;
+          height: 100px;
+          object-fit: cover;
+          border-radius: 10px;
+        }
+        .item-info {
+          margin-top: 10px;
+          font-size: 14px;
+        }
+        .item-info p {
+          margin: 5px 0;
+        }
+        .item-card .button-group {
+          display: flex;
+          justify-content: space-between;
+          gap: 5px;
+          margin-top: 10px;
+        }
+        .item-card button {
+          flex: 1;
+          background-color: blue;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 14px;
+        }
+        .item-card button.edit-btn {
+          background-color: red;
+        }
+        .item-card button:hover {
+          opacity: 0.9;
+        }
+        .popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.5);
+          display: none;
+          justify-content: center;
+          align-items: center;
+          z-index: 1000;
+        }
+        .popup-content {
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 15px;
+          width: 90%;
+          max-width: 400px;
+          text-align: center;
+          position: relative;
+        }
+        .popup-content img {
+          width: 80px;
+          height: 80px;
+          object-fit: cover;
+          border-radius: 10px;
+        }
+        .popup-content button {
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          padding: 10px 15px;
+          border-radius: 10px;
+          cursor: pointer;
+          margin-top: 10px;
+          width: 100%;
+        }
+        .popup-content button.delete-btn {
+          background-color: #FF4C4C;
+        }
+        .popup-content .close-btn {
+          position: relative;
+          top: 1px;
+          right: 1px;
+          background-color: blue;
+          border: none;
+          font-size: 10px;
+          cursor: pointer;
+        }
+        h1{
+          text-align: center;
+          background-color: blue;
+          border-bottom-right-radius: 20%;
+          border-bottom-left-radius: 20%;
+          color: white;
+          
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">×</button>
+        <nav>
+            <header style="background-color: white; color: blue; padding: 20px; font-size: 20px;"><b>NAVIGATION BAR</b></header>
+            <ul>
+                <b>
+                <li><a href="homepage.html">HOMEPAGE</a></li>
+                <li><a href="POINT OF SALE.html">POINT OF SALE</a></li>
+                <li><a href="ADD STOCK.html">ADD STOCK</a></li>
+                <li><a href="EXPENSES.html">EXPENSES</a></li>
+                <li><a href="SALES RECORDS.html">SALES RECORDS</a></li>
+                <li><a href="ORDERS MANAGEMENT.html">ORDERS MANAGEMENT</a></li>
+                <li><a href="MY ACCOUNT.html">MY ACCOUNT</a></li>
+                </b>
+            </ul>
+            <pre>
+
+
+
+
+            </pre>
+            <footer style="background-color: white; color: blue;"><b>We value your trust. Thank you for choosing PIDEN. </b></footer>
+        </nav>
+    </div>
+    <div class="main-content">
+        <header>
+            <h1>
+                <img src="Favicon.jpg" style="width: 50px; height: 50px; border-radius: 100%;">
+                &nbsp&nbsp&nbsp&nbspPIDEN POINT OF SALE &nbsp&nbsp&nbsp&nbsp
+                <button class="open-btn" style=" border-radius: 100%;" onclick="toggleSidebar()">☰</button>
+            </h1>
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search..." onkeyup="searchItems()">
+            <button onclick="searchItems()"><i class="fas fa-search"></i></button>
+        </div>     
+        </header>
+        <h1>POINT OF SALE</h1>
+        <div class="category-icons">
+            <button onclick="filterItems('product')">Products</button>
+            <button onclick="filterItems('service')">Services</button>
+            <button onclick="filterItems('other')">Other</button>
+        </div>        
+        <div class="items-container" id="itemsContainer"></div>        
+        <div class="popup-overlay" id="popupOverlay">
+            <div class="popup-content" id="popupContent">
+                <button class="close-btn" onclick="closePopup()">&times;</button>
+            </div>
+        </div>
+        <footer style="background-color: blue; color: white;">
+            <p>&copy; 2025 PIDEN Point of Sale System</p>
+        </footer>
+    </div>
+          <!-- Supabase JS Library (must come FIRST before you use supabase) -->
+          <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+          <!-- Supabase Initialization -->
+          <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                   const supabaseUrl = "https://mzvlybnvgpemdayoylfk.supabase.co";
+                   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16dmx5Ym52Z3BlbWRheW95bGZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU0MjkyODMsImV4cCI6MjA2MTAwNTI4M30.bRg54tsPook5UrfUM1p3y2WWkZqv_u7vbHpBGBKrQ4E";
+                   window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
+               });
+          </script>
+
+    <script>
+      // Sidebar toggle function
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+              sidebar.classList.toggle("active");
+            }
+            
+      document.addEventListener('DOMContentLoaded', loadItems);
+
+        async function loadItems(category = '') {
+            if (category) {
+                localStorage.setItem('selectedCategory', category); // Save the selected category
+            } else {
+                category = localStorage.getItem('selectedCategory') || ''; // Retrieve last selected category
+            }
+
+            const itemsContainer = document.getElementById('itemsContainer');
+            itemsContainer.innerHTML = '';
+
+            // Fetch items from Supabase
+            let { data: items, error } = await supabase
+                .from('items') // Your items table in Supabase
+                .select('*'); // Get all fields of the items table
+
+            if (error) {
+                console.error('Error loading items from Supabase', error);
+                return;
+            }
+
+            const filteredItems = category ? items.filter(item => item.type === category) : items;
+
+            filteredItems.forEach((item, index) => {
+                let profit = item.type === 'product' ? item.selling_price - item.buying_price : 0;
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <img src="${item.image_url}" alt="${item.name}">
+                    <div class="item-info">
+                        <p><strong>${item.name}</strong></p>
+                        <p><strong>Stock: ${item.stock ?? 0}</strong> in Stock</p>
+                        <p>${item.type === 'product' ? 'Selling Price: Ksh.' + item.selling_price : 'Customer Price: Ksh.' + item.customer_price}</p>
+                        <div class="button-group">
+                            <button onclick="openPopup(${index})">Add to Cart</button>
+                            <button class="edit-btn" onclick="openEditPopup(${index})">Edit</button>
+                        </div>
+                    </div>
+                `;
+                itemsContainer.appendChild(itemCard);
+            });
+        }
+
+        function filterItems(type) {
+            loadItems(type);
+        }
+
+        async function openPopup(index) {  
+            // Fetch items from Supabase
+            const { data: items, error } = await supabase
+                .from('items')  // Make sure this table name is correct
+                .select('*');
+            
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+
+            // ✅ FIX: Ensure we always use the stored price (reset from any previous checkout edits)
+            const originalSellingPrice = parseFloat(item.selling_price) || 0;
+            const originalCustomerPrice = parseFloat(item.customer_price) || 0;
+
+            // ✅ FIX: Determine which price to display based on item type
+            const displayedPrice = item.type === 'product' ? originalSellingPrice : originalCustomerPrice;
+
+            // ✅ FIX: Ensure values are defined and default to 0 if missing
+            const buyingPrice = parseFloat(item.buying_price) || 0;
+            const costService = parseFloat(item.cost_service) || 0;
+            const cost = parseFloat(item.cost) || 0;
+
+            // ✅ FIX: Calculate profit safely
+            let profit = 0;
+            if (item.type === 'product') {
+                profit = displayedPrice - buyingPrice;
+            } else if (item.type === 'service') {
+                profit = displayedPrice - costService;
+            } else {
+                profit = displayedPrice - cost;
+            }
+
+            document.getElementById('popupContent').innerHTML = `
+                <button class="close-btn" onclick="closePopup()">&times;</button>
+                <h3>${item.name}</h3>
+                <img src="${item.image_url}" alt="${item.name}">  <!-- Updated to 'image_url' -->
+                <p>${item.type === 'product' ? 'Buying Price: Ksh.' + buyingPrice : item.type === 'service' ? 'Cost of Service: Ksh.' + costService : 'Cost: Ksh.' + cost}</p>
+                <p>
+                    ${item.type === 'product' ? 'Selling Price:' : 'Customer Price:'} 
+                    Ksh. <span id="priceDisplay">${displayedPrice}</span>
+                    <span class="edit-icon" onclick="editSellingPrice(${index})">&#9998;</span>
+                </p>
+                <p>Quantity: <input type="number" id="quantity" value="1" min="1" max="${item.stock}" onchange="updatePriceTotal(${index})"></p>
+                <p><strong>Profit: Ksh. <span id="profitDisplay">${profit}</span></strong></p>
+                <button onclick="proceedToCheckout(${index})">Proceed to Checkout</button>
+            `;
+
+            document.getElementById('popupOverlay').style.display = 'flex';
+        }
+
+        // Temporary storage for edited prices (clears after each checkout)
+        let temporaryCheckoutPrices = {};
+
+        async function editSellingPrice(index) {
+            // Fetch the item from Supabase using the index
+            const { data: items, error } = await supabase
+                .from('items')  // Ensure this table name is correct
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+
+            // Prompt user to input the new selling price
+            let newPrice = prompt("Enter new selling price:", item.selling_price);
+
+            // Validate the entered price
+            if (newPrice && !isNaN(newPrice) && newPrice > 0) {
+                // Update the selling price temporarily for this transaction
+                temporaryCheckoutPrices[index] = parseFloat(newPrice);
+
+                // Update the price in Supabase
+                const { error: updateError } = await supabase
+                    .from('items')
+                    .update({ selling_price: parseFloat(newPrice) })
+                    .eq('id', item.id); // Assuming 'id' is the primary key
+
+                if (updateError) {
+                    console.error('Error updating selling price:', updateError);
+                    return;
+                }
+
+                // Update the total price based on the new selling price
+                updatePriceTotal(index, parseFloat(newPrice));
+
+                // Optionally, you could alert the user that the price was updated
+                alert("Selling price updated successfully!");
+            } else {
+                alert("Invalid price entered.");
+            }
+        }
+
+        async function updatePriceTotal(index, editedPrice = null) {
+            const { data: items, error } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+            if (!item) {
+                console.error("Item not found at index:", index);
+                return;
+            }
+
+            let quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            // ✅ Correctly fetch the latest edited price if available
+            let sellingPrice = editedPrice !== null
+                ? editedPrice
+                : (temporaryCheckoutPrices[index] !== undefined 
+                    ? temporaryCheckoutPrices[index] 
+                    : (item.type === "product" ? item.selling_price : item.customer_price));
+
+            // ✅ Prevent price from resetting to zero
+            if (!sellingPrice || isNaN(sellingPrice) || sellingPrice <= 0) {
+                console.warn("Selling price issue, defaulting to original");
+                sellingPrice = item.type === "product" ? item.selling_price : item.customer_price;
+            }
+
+            // ✅ Calculate stockAmount correctly for services and others
+            let stockAmount = 0;
+            if (item.type === "product") {
+                stockAmount = (item.buying_price || 0) * quantity;
+                sellingPrice = (sellingPrice || 0) * quantity; 
+            } else if (item.type === "service") {
+                stockAmount = (item.cost_service || 0) * quantity;
+                sellingPrice = (sellingPrice || 0) * quantity;
+            } else {
+                stockAmount = (item.cost || 0) * quantity;
+                sellingPrice = (sellingPrice || 0) * quantity;
+            }
+
+            let profit = (sellingPrice - stockAmount);
+
+            // ✅ Update UI dynamically
+            document.getElementById('priceDisplay').innerText = sellingPrice.toFixed(2);
+            document.getElementById('profitDisplay').innerText = profit.toFixed(2);
+        }
+
+        async function openEditPopup(index) {
+            const { data: items, error } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+            if (!item) {
+                console.error("Item not found at index:", index);
+                return;
+            }
+
+            document.getElementById('popupContent').innerHTML = `
+                <button class="close-btn" onclick="closePopup()">&times;</button>
+                <h3>Edit ${item.name}</h3>
+                <p><strong>Update ${item.type === 'product' ? 'Selling Price' : 'Customer Price'}:</strong></p>
+                <input type="number" id="newPrice" placeholder="New ${item.type === 'product' ? 'Selling Price' : 'Customer Price'}" value="${item.type === 'product' ? item.selling_price : item.customer_price}" style="width:100%; padding:8px; margin:8px 0;">
+                <p><strong>Add Stock:</strong></p>
+                <input type="number" id="additionalStock" placeholder="Enter additional stock" style="width:100%; padding:8px; margin:8px 0;">
+                <button onclick="updatePrice(${index})">Update</button>
+                <button class="delete-btn" onclick="confirmDelete(${index})">Delete Item</button>
+            `;
+
+            document.getElementById('popupOverlay').style.display = 'flex';
+        }
+
+        async function updatePrice(index) {
+            const newPrice = document.getElementById('newPrice').value;
+            const additionalStock = parseInt(document.getElementById('additionalStock').value) || 0;
+            const category = localStorage.getItem('selectedCategory') || '';
+
+            if (!newPrice || isNaN(newPrice) || newPrice <= 0) return alert('Please enter a valid price.');
+
+            // Fetch the items from Supabase
+            const { data: items, error } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+            if (!item) {
+                console.error("Item not found at index:", index);
+                return;
+            }
+
+            // Update the price and stock
+            const updatedFields = {
+                stock: (item.stock || 0) + additionalStock,
+            };
+
+            if (item.type === 'product') {
+                updatedFields.selling_price = newPrice;  // Update selling price for product
+            } else {
+                updatedFields.customer_price = newPrice; // Update customer price for service
+            }
+
+            // Update the item in the database
+            const { error: updateError } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .update(updatedFields)
+                .eq('id', item.id); // Use the primary key to target the correct row
+
+            if (updateError) {
+                console.error('Error updating item:', updateError);
+                return;
+            }
+
+            // Success message and closing the popup
+            alert('Stock and Price updated successfully!');
+            closePopup();
+
+            // Reload items (apply category filter if any)
+            loadItems(category);
+        }
+
+        async function confirmDelete(index) {
+            const confirmed = confirm('Are you sure you want to delete this item?');
+            if (!confirmed) return;
+
+            // Fetch the items from Supabase
+            const { data: items, error } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+            if (!item) {
+                console.error("Item not found at index:", index);
+                return;
+            }
+
+            // Delete the item from Supabase
+            const { error: deleteError } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .delete()
+                .eq('id', item.id); // Use the primary key (id) to delete the correct row
+
+            if (deleteError) {
+                console.error('Error deleting item:', deleteError);
+                return;
+            }
+
+            // Success message and closing the popup
+            alert('Item deleted successfully!');
+            closePopup();
+
+            // Reload items from Supabase after deletion (apply category filter if any)
+            loadItems(localStorage.getItem('selectedCategory') || '');
+        }
+
+        async function proceedToCheckout(index) {
+            let quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            // Fetch items from Supabase (instead of using localStorage)
+            const { data: items, error } = await supabase
+                .from('items') // Ensure this is the correct table name
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching items:', error);
+                return;
+            }
+
+            const item = items[index];
+            if (!item) {
+                console.error("Item not found at index:", index);
+                return;
+            }
+
+            // ✅ Use the edited price if available, otherwise use the item's original selling price
+            let finalCheckoutPrice = temporaryCheckoutPrices[index] !== undefined 
+                ? temporaryCheckoutPrices[index] 
+                : item.sellingPrice;
+
+            // ✅ Store checkout details (still using localStorage here to track the checkout session)
+            localStorage.setItem('checkoutIndex', index);
+            localStorage.setItem('checkoutQuantity', quantity);
+            localStorage.setItem('checkoutPrice', finalCheckoutPrice);
+
+            // Open payment popup
+            openPaymentPopup();
+        }
+
+        let selectedPaymentMode = null; // Store selected mode globally
+
+        function openPaymentPopup() {
+            document.getElementById('popupContent').innerHTML = `
+                <button class="close-btn" onclick="closePopup()">&times;</button>
+                <h3>PAYMENT MODE</h3>
+                <div style="display: flex; justify-content: center; gap: 20px; margin-top: 10px;">
+                    <img src="MPESA.jpeg" alt="Mpesa" class="payment-option" onclick="selectPaymentMode('Mpesa')">
+                    <img src="CASH.jpg" alt="Cash" class="payment-option" onclick="selectPaymentMode('Cash')">
+                </div>
+                <p id="selectedModeText" style="text-align: center; font-weight: bold; margin-top: 10px;"></p>
+                <button onclick="finalizeCheckout()" class="checkout-btn">Checkout</button>
+            `;
+            document.getElementById('popupOverlay').style.display = 'flex';
+        }
+
+
+        function selectPaymentMode(mode) {
+            selectedPaymentMode = mode; // Store the selected mode
+            document.getElementById('selectedModeText').innerText = `${mode}`; // Show text below images
+        }
+
+        async function finalizeCheckout() {
+            let checkoutIndex = localStorage.getItem('checkoutIndex');
+            let checkoutQuantity = parseInt(localStorage.getItem('checkoutQuantity'));
+            let checkoutPrice = parseFloat(localStorage.getItem('checkoutPrice'));
+
+            if (!selectedPaymentMode) {
+                alert("Please select a payment mode.");
+                return;
+            }
+            if (!checkoutQuantity || isNaN(checkoutQuantity)) {
+                alert("Error: Quantity not found. Please try again.");
+                return;
+            }
+
+            const category = localStorage.getItem('selectedCategory') || '';
+            const { data: items, error } = await supabase
+                .from('items')
+                .select('*')
+                .eq('type', category);
+
+            if (error) {
+                console.error('Error loading items:', error.message);
+                return;
+            }
+
+            const item = items[checkoutIndex];
+
+            if (!item) {
+                alert("Item not found. Please reload and try again.");
+                return;
+            }
+
+            // 🛠️ Correct stock update (only for products!)
+            if (item.type === 'product') {
+                if (checkoutQuantity > item.stock) {
+                    alert(`Only ${item.stock} available in stock.`);
+                    return;
+                }
+
+                const newStock = item.stock - checkoutQuantity;
+                await supabase
+                    .from('items')
+                    .update({ stock: newStock })
+                    .eq('id', item.id);
+            }
+
+            // 🛠️ Correct price handling
+            let sellingPriceEach = checkoutPrice || (item.type === "product" ? item.sellingPrice : item.customerPrice);
+
+            if (!sellingPriceEach || isNaN(sellingPriceEach)) {
+                console.warn("Price issue detected. Using original price.");
+                sellingPriceEach = item.type === "product" ? item.sellingPrice : item.customerPrice;
+            }
+
+            const sellingAmount = sellingPriceEach * checkoutQuantity;
+
+            // 🛠️ Correct cost handling
+            let stockAmountEach = 0;
+            if (item.type === "product") stockAmountEach = item.buyingPrice || 0;
+            else if (item.type === "service") stockAmountEach = item.costService || 0;
+            else stockAmountEach = item.cost || 0;
+
+            const stockAmount = stockAmountEach * checkoutQuantity;
+            const profit = sellingAmount - stockAmount;
+
+            // 🛠️ Record Sale to Supabase
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' }).replace(',', '');
+            const formattedTime = today.toLocaleTimeString();
+
+            const { error: saleError } = await supabase
+                .from('sales')
+                .insert([{
+                    itemName: item.name,
+                    itemType: category,
+                    quantity: checkoutQuantity,
+                    stockAmount: stockAmount.toFixed(2),
+                    sellingAmount: sellingAmount.toFixed(2),
+                    profit: profit.toFixed(2),
+                    modeOfPayment: selectedPaymentMode,
+                    timeSold: formattedTime,
+                    dateSold: formattedDate
+                }]);
+
+            if (saleError) {
+                console.error('Error saving sale:', saleError.message);
+                return;
+            }
+
+            document.getElementById('popupContent').innerHTML = `<h3 style="text-align: center; color: green;">Checkout Successful</h3>`;
+            setTimeout(() => {
+                closePopup();
+            }, 1000);
+
+            window.dispatchEvent(new Event("storage"));
+            clearTemporaryCheckoutPrices();
+        }
+
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        async function searchItems() {
+            let input = document.getElementById('searchInput').value.toLowerCase();
+            let itemsContainer = document.getElementById('itemsContainer');
+            let category = localStorage.getItem('selectedCategory') || '';
+
+            itemsContainer.innerHTML = '';
+
+            if (input === '') {
+                loadItems(category); // Just reload current category if input is empty
+                return;
+            }
+
+            try {
+                // 🛜 Fetch items from Supabase based on search
+                let { data: items, error } = await supabase
+                    .from('items')
+                    .select('*')
+                    .ilike('name', `%${input}%`);
+
+                if (error) {
+                    console.error('Error searching items:', error.message);
+                    return;
+                }
+
+                // ✅ Optional: filter by category if needed
+                if (category) {
+                    items = items.filter(item => item.type === category);
+                }
+
+                items.forEach((item) => {
+                    const itemCard = document.createElement('div');
+                    itemCard.className = 'item-card';
+                    itemCard.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}">
+                        <div class="item-info">
+                            <p><strong>${item.name}</strong></p>
+                            <p>${item.stock || 0} in Stock</p>
+                            <p>${item.type === 'product' ? 'Selling Price: Ksh.' + item.sellingPrice : 'Customer Price: Ksh.' + item.customerPrice}</p>
+                            <div class="button-group">
+                                <button onclick="openPopup('${item.id}')">Add to Cart</button>
+                                <button class="edit-btn" onclick="openEditPopup('${item.id}')">Edit</button>
+                            </div>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(itemCard);
+                });
+
+                // Clear search bar after user interacts with search results
+                document.getElementById('searchInput').addEventListener('blur', function () {
+                    this.value = '';
+                });
+
+            } catch (err) {
+                console.error('Unexpected error during search:', err.message);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const itemsContainer = document.getElementById("items-container"); // Make sure your HTML has this
+            itemsContainer.innerHTML = ""; // Clear previous content
+
+            try {
+                // 🛜 Fetch all items from Supabase
+                const { data: items, error } = await supabase
+                    .from('items')
+                    .select('*');
+
+                if (error) {
+                    console.error('Error loading items:', error.message);
+                    return;
+                }
+
+                items.forEach(item => {
+                    const itemElement = document.createElement("div");
+                    itemElement.classList.add("item-card"); // For styling
+                    itemElement.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}" class="item-image">
+                        <h3>${item.name}</h3>
+                        <p>Stock: <span class="stock-count">${item.stock}</span></p>
+                        <p>Price: ${item.sellingPrice || item.customerPrice}</p>
+                        <button class="add-to-cart" onclick="openPopup('${item.id}')">Add to Cart</button>
+                    `;
+                    itemsContainer.appendChild(itemElement);
+                });
+            } catch (err) {
+                console.error('Unexpected error fetching items:', err.message);
+            }
+        });
+    </script>
+</body>
+</html>
